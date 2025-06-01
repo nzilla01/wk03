@@ -31,6 +31,7 @@ router.get('/login', (req, res) => {
     return res.send(`Welcome back ${req.user.username}`);
   }
   res.send('<a href="auth/github/">Login with GitHub</a>');
+ 
 });
 
 // Logout route
