@@ -57,7 +57,7 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : 'logged out ')}); // Home route
+app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : ' unauthorize user login to have access ')}); // Home route
 
 app.get('/github/callback', passport.authenticate('github',{failureRedirect:'/api-docs', session:false}),
 (req, res) => { req.session.user = req.user; // Store user in session

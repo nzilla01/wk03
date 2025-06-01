@@ -17,16 +17,8 @@ router.get('/doc-link', (req, res) => {
   res.send({ documentation: 'https://bookstore-api-docs.herokuapp.com/api-docs/' });
 });
 
-// GitHub login route
-router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
-
-// GitHub callback route
-// router.get('/github/callback',
-//   passport.authenticate('github', { failureRedirect: '/login' }),
-//   (req, res) => {
-//     res.send(`Welcome ${req.user.username}, you have successfully logged in via GitHub.`);
-//   }
-// );
+// // GitHub login route
+// router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 
 // Login status check
 router.get('/login', passport.authenticate('github'), (req, res) => {})
