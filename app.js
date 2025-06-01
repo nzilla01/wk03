@@ -12,36 +12,41 @@ const swaggerDocument = require('./swagger.json');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(bodyParser.json());
-
+// Middlewares
+app.use(bodyParser.json()); 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.initialize()); // Initialize Passport
+app.use(passport.session());  // Use sessions for persistent login sessions
 
-app.use(cors({
-  origin: '*',
-  methods: 'GET, POST, PUT, DELETE, OPTIONS',
-  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Z-key',
-}));
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Z-key');
+  next();
+});
+app.use(cors({methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'}));
+app.use(cors({ origin: '*' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB
+
+// Connect to DB
 connectDB();
 
-// Passport GitHub Strategy
+// 
+
+// Passport GitHub OAuth Strategy
 passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_CLIENT_ID,
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
   callbackURL: process.env.GITHUB_CALLBACK_URL
 },
-(accessToken, refreshToken, profile, done) => {
+ (accessToken, refreshToken, profile, done) => {
   return done(null, profile);
 }));
 
@@ -52,35 +57,14 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// Home route
-app.get('/', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.send(`Welcome ${req.user.username}`);
-  } else {
-    res.send('Unauthorized user. Please log in to access.');
-  }
+app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : ' unauthorize user login to have access ')}); // Home route
+
+app.get('/github/callback', passport.authenticate('github',{failureRedirect:'/api-docs', session:false}),
+(req, res) => { req.session.user = req.user; // Store user in session
+  res.redirect('/'); // Redirect to home page after successful login
 });
 
-// GitHub OAuth Login route
-app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
-
-// GitHub Callback
-app.get('/auth/github/callback', 
-  passport.authenticate('github', { failureRedirect: '/api-docs' }),
-  (req, res) => {
-    res.redirect('/'); // You can also redirect to /api-docs or dashboard
-  }
-);
-
-// Logout
-app.get('/logout', (req, res, next) => {
-  req.logout(err => {
-    if (err) return next(err);
-    res.redirect('/');
-  });
-});
-
-// Swagger Docs
+// Swagger API Docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes

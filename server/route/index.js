@@ -4,32 +4,34 @@ const bookController = require('../controller/controler');
 const userController = require('../controller/usercontr');
 const passport = require('passport');
 
-// Auth middleware
+// Auth middleware using Passport's built-in method
 function isAuthenticated(req, res, next) {
-  if (req.session.user === undefined) {
-    return res.status(401).send('Unauthorized: No session available');
+  console.log('Auth check - isAuthenticated:', req.isAuthenticated());
+  if (req.isAuthenticated()) {
+    return next();
   }
-  next();
+  return res.status(401).json({ message: 'Unauthorized - Please log in first' });
 }
 
-// Public doc route
+// Public routes
 router.get('/doc-link', (req, res) => {
-  res.send({ documentation: 'https://bookstore-api-docs.herokuapp.com/api-docs/' });
+  res.json({ documentation: 'https://bookstore-api-docs.herokuapp.com/api-docs/' });
 });
 
-// // GitHub login route
-// router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
-
-// Login status check
-router.get('/login', passport.authenticate('github'), (req, res) => {})
+// Auth routes
+router.get('/login', passport.authenticate('github'));
 
 router.get('/logout', (req, res, next) => {
-  req.logout(function(err) {
-    if (err) { return next(err); }
-    res.redirect('/'); // Redirect to home after logout
-    });
+  req.logout((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      return next(err);
+    }
+    req.session.destroy();
+    console.log('User logged out successfully');
+    res.redirect('/');
   });
-
+});
 
 // Protected Book Routes
 router.get('/books', isAuthenticated, bookController.getAllBooks);
@@ -37,7 +39,6 @@ router.post('/books', isAuthenticated, bookController.addBooks);
 router.get('/books/:id', isAuthenticated, bookController.getBookById);
 router.put('/books/:id', isAuthenticated, bookController.updateBook);
 router.delete('/books/:id', isAuthenticated, bookController.deleteBook);
-
 
 // Protected User Routes
 router.get('/users', isAuthenticated, userController.getAllUsers);
