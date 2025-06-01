@@ -19,10 +19,12 @@ connectDB();
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: 'https://wk03.onrender.com', 
-  credentials: true,               
+  methods: 'GET, POST, PUT, DELETE, OPTIONS',            
 }));
-
+app.use(cors({
+  origin: '*',
+ 
+}));
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -39,6 +41,7 @@ app.use((req, res, next) => {
 
 app.use(passport.initialize());
 app.use(passport.session());
+//cors
 
 // Passport GitHub OAuth Strategy
 passport.use(new GitHubStrategy({
