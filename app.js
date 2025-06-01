@@ -15,36 +15,29 @@ const PORT = process.env.PORT || 3000;
 // Connect to DB
 connectDB();
 
-// Middlewares
-app.use(bodyParser.json());
+// CORS configuration (only use this once)
+app.use(cors({
+  origin: 'http://localhost:3000', // or frontend URL
+  credentials: true,              // allow cookies
+}));
+
+// Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false, // Set true if using HTTPS
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+  }
 }));
+
+// Middlewares
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use(passport.session());
-
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'orgin, X-Requested-With, Content-Type, Accept, Authorization');
-  next();
-});
-
-
-app.use(express.urlencoded({ extended: true }));
-// CORS configuration
-app.use(cors({
-  methods: ['GET, POST, PUT, DELETE, OPTIONS',]            
-}));
-app.use(cors({
-  origin: '*',
- 
-}));
-
-
 
 // Passport GitHub OAuth Strategy
 passport.use(new GitHubStrategy({

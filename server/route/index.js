@@ -26,27 +26,33 @@ router.get('/github/callback',
   }
 );
 
+// Login status check
 router.get('/login', (req, res) => {
   if (req.isAuthenticated()) {
     return res.send(`Welcome back ${req.user.username}`);
   }
-  res.send('<a href="auth/github/">Login with GitHub</a>');
- 
+  res.send('<a href="/auth/github">Login with GitHub</a>');
 });
 
 // Logout route
-router.get('/logout', (req, res) => {
-  req.logout(() => {
+router.get('/logout', (req, res, next) => {
+  req.logout(err => {
+    if (err) return next(err);
     res.send('You have been logged out.');
   });
 });
 
+// Debug route (optional)
+router.get('/me', (req, res) => {
+  res.send(req.user || 'Not logged in');
+});
+
 // Protected Book Routes
-router.get('/', isAuthenticated, bookController.getAllBooks);
-router.post('/', isAuthenticated, bookController.addBooks);
-router.get('/:id', isAuthenticated, bookController.getBookById);
-router.put('/:id', isAuthenticated, bookController.updateBook);
-router.delete('/:id', isAuthenticated, bookController.deleteBook);
+router.get('/books', isAuthenticated, bookController.getAllBooks);
+router.post('/books', isAuthenticated, bookController.addBooks);
+router.get('/books/:id', isAuthenticated, bookController.getBookById);
+router.put('/books/:id', isAuthenticated, bookController.updateBook);
+router.delete('/books/:id', isAuthenticated, bookController.deleteBook);
 
 // Protected User Routes
 router.get('/users', isAuthenticated, userController.getAllUsers);
