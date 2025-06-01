@@ -17,31 +17,34 @@ connectDB();
 
 // Middlewares
 app.use(bodyParser.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'orgin, X-Requested-With, Content-Type, Accept, Authorization');
+  next();
+});
+
+
 app.use(express.urlencoded({ extended: true }));
+// CORS configuration
 app.use(cors({
-  methods: 'GET, POST, PUT, DELETE, OPTIONS',            
+  methods: ['GET, POST, PUT, DELETE, OPTIONS',]            
 }));
 app.use(cors({
   origin: '*',
  
 }));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
-}));
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://wk03.onrender.com');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
-
-app.use(passport.initialize());
-app.use(passport.session());
-//cors
 
 // Passport GitHub OAuth Strategy
 passport.use(new GitHubStrategy({
