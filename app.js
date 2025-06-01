@@ -60,7 +60,7 @@ passport.deserializeUser((user, done) => {
 app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : ' unauthorize user login to have access ')}); // Home route
 
 app.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login', session: true }),
+  passport.authenticate('github', { failureRedirect: '/login', session:false }),
   (req, res) => {
     res.redirect('/api-docs'); // Redirect to Swagger after login
   }
@@ -68,7 +68,11 @@ app.get('/github/callback',
 
 
 // Swagger API Docs
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+  swaggerOptions: {
+    withCredentials: true
+  }
+}));
 
 // Routes
 app.use('/', require('./server/route/index'));
