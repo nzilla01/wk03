@@ -6,8 +6,10 @@ const passport = require('passport');
 
 // Auth middleware
 function isAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.status(401).send('Unauthorized: Please login with GitHub');
+  if (req.session.user === undefined) {
+    return res.status(401).send('Unauthorized: No session available');
+  }
+  next();
 }
 
 // Public doc route
@@ -19,33 +21,23 @@ router.get('/doc-link', (req, res) => {
 router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 
 // GitHub callback route
-router.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login' }),
-  (req, res) => {
-    res.send(`Welcome ${req.user.username}, you have successfully logged in via GitHub.`);
-  }
-);
+// router.get('/github/callback',
+//   passport.authenticate('github', { failureRedirect: '/login' }),
+//   (req, res) => {
+//     res.send(`Welcome ${req.user.username}, you have successfully logged in via GitHub.`);
+//   }
+// );
 
 // Login status check
-router.get('/login', (req, res) => {
-  if (req.isAuthenticated()) {
-    return res.send(`Welcome back ${req.user.username}`);
-  }
-  res.send('<a href="/auth/github">Login with GitHub</a>');
-});
+router.get('/login', passport.authenticate('github'), (req, res) => {})
 
-// Logout route
 router.get('/logout', (req, res, next) => {
-  req.logout(err => {
-    if (err) return next(err);
-    res.send('You have been logged out.');
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('/'); // Redirect to home after logout
+    });
   });
-});
 
-// Debug route (optional)
-router.get('/me', (req, res) => {
-  res.send(req.user || 'Not logged in');
-});
 
 // Protected Book Routes
 router.get('/books', isAuthenticated, bookController.getAllBooks);
@@ -53,6 +45,7 @@ router.post('/books', isAuthenticated, bookController.addBooks);
 router.get('/books/:id', isAuthenticated, bookController.getBookById);
 router.put('/books/:id', isAuthenticated, bookController.updateBook);
 router.delete('/books/:id', isAuthenticated, bookController.deleteBook);
+
 
 // Protected User Routes
 router.get('/users', isAuthenticated, userController.getAllUsers);

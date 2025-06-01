@@ -12,39 +12,41 @@ const swaggerDocument = require('./swagger.json');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connect to DB
-connectDB();
-
-// CORS configuration (only use this once)
-app.use(cors({
-  origin: 'http://localhost:3000', // or frontend URL
-  credentials: true,              // allow cookies
-}));
-
-// Session configuration
+// Middlewares
+app.use(bodyParser.json()); 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: false, // Set true if using HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
-  }
 }));
 
-// Middlewares
-app.use(bodyParser.json());
+app.use(passport.initialize()); // Initialize Passport
+app.use(passport.session());  // Use sessions for persistent login sessions
+
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Z-key');
+  next();
+});
+app.use(cors({methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'}));
+app.use(cors({ origin: '*' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
-app.use(passport.session());
+
+
+// Connect to DB
+connectDB();
+
+// 
 
 // Passport GitHub OAuth Strategy
 passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_CLIENT_ID,
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
-  callbackURL: process.env.GITHUB_CALLBACK_URL,
-}, (accessToken, refreshToken, profile, done) => {
+  callbackURL: process.env.GITHUB_CALLBACK_URL
+},
+ (accessToken, refreshToken, profile, done) => {
   return done(null, profile);
 }));
 
@@ -53,6 +55,13 @@ passport.serializeUser((user, done) => {
 });
 passport.deserializeUser((user, done) => {
   done(null, user);
+});
+
+app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : 'logged out ')}); // Home route
+
+app.get('/github/callbacck', passport.authenticate('github',{failureRedirect:'/api-docs', session:false}),
+(req, res) => { req.session.user = req.user; // Store user in session
+  res.redirect('/'); // Redirect to home page after successful login
 });
 
 // Swagger API Docs
