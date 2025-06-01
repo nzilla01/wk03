@@ -31,7 +31,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'}));
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: '*', credentials: true })); // Enable CORS for all origins
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -59,10 +59,13 @@ passport.deserializeUser((user, done) => {
 
 app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : ' unauthorize user login to have access ')}); // Home route
 
-app.get('/github/callback', passport.authenticate('github',{failureRedirect:'/api-docs', session:false}),
-(req, res) => { req.session.user = req.user; // Store user in session
-  res.redirect('/'); // Redirect to home page after successful login
-});
+app.get('/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login', session: true }),
+  (req, res) => {
+    res.redirect('/api-docs'); // Redirect to Swagger after login
+  }
+);
+
 
 // Swagger API Docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
