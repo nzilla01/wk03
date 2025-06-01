@@ -60,11 +60,12 @@ passport.deserializeUser((user, done) => {
 app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : ' unauthorize user login to have access ')}); // Home route
 
 app.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login', session:false }),
+  passport.authenticate('github', { failureRedirect: '/login'}),
   (req, res) => {
     res.redirect('/api-docs'); // Redirect to Swagger after login
   }
 );
+
 
 
 // Swagger API Docs
