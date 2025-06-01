@@ -59,7 +59,7 @@ passport.deserializeUser((user, done) => {
 
 app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : 'logged out ')}); // Home route
 
-app.get('/github/callbacck', passport.authenticate('github',{failureRedirect:'/api-docs', session:false}),
+app.get('/github/callback', passport.authenticate('github',{failureRedirect:'/api-docs', session:false}),
 (req, res) => { req.session.user = req.user; // Store user in session
   res.redirect('/'); // Redirect to home page after successful login
 });
