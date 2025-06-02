@@ -5,7 +5,7 @@ const doc = {
         title : 'MY API',
         description : 'books api',
     },
-    host: 'localhost:3000',
+    host: 'wk03.onrender.com',
     schemes: ['http'],
 };
 const outputFile = './swagger.json';
