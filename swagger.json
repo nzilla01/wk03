@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Books & Users API",
-    "description": "API docs for Books (at /) and Users (at /users) with full CRUD",
+    "description": "API docs for Books (at /books) and Users (at /users) with full CRUD",
     "version": "1.0.0"
   },
   "host": "localhost:3000",
@@ -11,7 +11,7 @@
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "paths": {
-    "/": {
+    "/books": {
       "get": {
         "summary": "Get all books",
         "responses": {
@@ -42,7 +42,7 @@
         }
       }
     },
-    "/{bookId}": {
+    "/books/{bookId}": {
       "get": {
         "summary": "Get book by ID",
         "parameters": [
@@ -54,7 +54,10 @@
           }
         ],
         "responses": {
-          "200": { "description": "Book found", "schema": { "$ref": "#/definitions/Book" } },
+          "200": {
+            "description": "Book found",
+            "schema": { "$ref": "#/definitions/Book" }
+          },
           "404": { "description": "Book not found" },
           "500": { "description": "Internal Server Error" }
         }
@@ -76,7 +79,10 @@
           }
         ],
         "responses": {
-          "200": { "description": "Book updated", "schema": { "$ref": "#/definitions/Book" } },
+          "200": {
+            "description": "Book updated",
+            "schema": { "$ref": "#/definitions/Book" }
+          },
           "400": { "description": "Invalid input" },
           "404": { "description": "Book not found" },
           "500": { "description": "Internal Server Error" }
@@ -142,7 +148,10 @@
           }
         ],
         "responses": {
-          "200": { "description": "User found", "schema": { "$ref": "#/definitions/User" } },
+          "200": {
+            "description": "User found",
+            "schema": { "$ref": "#/definitions/User" }
+          },
           "404": { "description": "User not found" },
           "500": { "description": "Internal Server Error" }
         }
@@ -164,7 +173,10 @@
           }
         ],
         "responses": {
-          "200": { "description": "User updated", "schema": { "$ref": "#/definitions/User" } },
+          "200": {
+            "description": "User updated",
+            "schema": { "$ref": "#/definitions/User" }
+          },
           "400": { "description": "Invalid input" },
           "404": { "description": "User not found" },
           "500": { "description": "Internal Server Error" }

@@ -31,7 +31,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'}));
-app.use(cors({ origin: '*', credentials: true })); // Enable CORS for all origins
+app.use(cors({ origin: '*' })); // Enable CORS for all origins
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -60,9 +60,11 @@ passport.deserializeUser((user, done) => {
 app.get('/', (req, res) => {res.send(req.session.user !== undefined ? `Welcome ${req.session.user.username}` : ' unauthorize user login to have access ')}); // Home route
 
 app.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login'}),
+  passport.authenticate('github', { failureRedirect: '/login', session:false }), // Authenticate with GitHub
   (req, res) => {
-    res.redirect('/api-docs'); // Redirect to Swagger after login
+    req.session.user = req.user; // Store user info in session  
+    res.redirect('/'); // Redirect to Swagger after login
+    // console.log('User authenticated:', req.user);
   }
 );
 

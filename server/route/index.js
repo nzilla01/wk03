@@ -6,11 +6,12 @@ const passport = require('passport');
 
 // Auth middleware using Passport's built-in method
 function isAuthenticated(req, res, next) {
-  console.log('Auth check - isAuthenticated:', req.isAuthenticated());
-  if (req.isAuthenticated()) {
-    return next();
+   if (req.session.user === undefined) {
+    console.log('Unauthorized access attempt');
+    return res.status(401).json({ message: 'Unauthorized' });
   }
-  return res.status(401).json({ message: 'Unauthorized - Please log in first' });
+  console.log('User authenticated:', req.session.user.username);
+  next();
 }
 
 // Public routes
