@@ -5,7 +5,7 @@
     "description": "API docs for Books (at /books) and Users (at /users) with full CRUD",
     "version": "1.0.0"
   },
-  "host": "localhost:3000",
+  "host": "https://wk03.onrender.com",
   "basePath": "/",
   "schemes": ["http"],
   "consumes": ["application/json"],
